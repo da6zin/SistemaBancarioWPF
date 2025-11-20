@@ -70,12 +70,15 @@ namespace SistemaBancarioSimples.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Transacao>> GetHistoricoAsync(int contaId)
+
+        // Certifique-se de ter: using Microsoft.EntityFrameworkCore;
+
+        public async Task<List<Transacao>> GetHistoricoAsync(int contaId)
         {
-            // Retorna as transações em ordem decrescente de data
+            // Busca na tabela de Transações onde o ContaId for igual ao do usuário
             return await _context.Transacoes
                                  .Where(t => t.ContaBancariaId == contaId)
-                                 .OrderByDescending(t => t.DataHora)
+                                 .OrderByDescending(t => t.DataHora) // Ordena do mais recente para o antigo
                                  .ToListAsync();
         }
     }

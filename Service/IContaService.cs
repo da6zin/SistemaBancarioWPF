@@ -12,6 +12,6 @@ namespace SistemaBancarioSimples.Service
         Task<ContaBancaria> GetContaAsync(int id);
         Task DepositarAsync(int contaId, decimal valor);
         Task SacarAsync(int contaId, decimal valor);
-        Task<IEnumerable<Transacao>> GetHistoricoAsync(int contaId);
+        Task<List<Transacao>> GetHistoricoAsync(int contaId);
     }
 }

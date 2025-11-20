@@ -1,12 +1,8 @@
 ﻿using SistemaBancarioSimples.Service;
 using System.Windows;
-using System.Threading.Tasks;
 
 namespace SistemaBancarioSimples
 {
-    /// <summary>
-    /// Lógica interna para HistoricoWindow.xaml
-    /// </summary>
     public partial class HistoricoWindow : Window
     {
         private readonly IContaService _contaService;
@@ -18,27 +14,29 @@ namespace SistemaBancarioSimples
             _contaService = contaService;
             _contaId = contaId;
 
-            // Carrega os dados quando a janela é aberta
-            Loaded += HistoricoWindow_Loaded;
+            // Chama o carregamento assim que a janela abre
+            CarregarHistorico();
         }
 
-        private async void HistoricoWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            await CarregarHistoricoAsync();
-        }
-
-        private async Task CarregarHistoricoAsync()
+        private async void CarregarHistorico()
         {
             try
             {
-                var historico = await _contaService.GetHistoricoAsync(_contaId);
-                // Define a fonte de dados do DataGrid
-                TransacoesDataGrid.ItemsSource = historico;
+                // AGORA SIM: Usamos o método específico que criamos
+                var transacoes = await _contaService.GetHistoricoAsync(_contaId);
+
+                // Joga a lista direto no Grid
+                TransacoesDataGrid.ItemsSource = transacoes;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar histórico: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao carregar histórico: {ex.Message}");
             }
+        }
+
+        private void FecharButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

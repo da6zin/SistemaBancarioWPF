@@ -1,34 +1,26 @@
-﻿using SistemaBancarioSimples.Data;
-using SistemaBancarioSimples.Model;
-using SistemaBancarioSimples.Service;
-using System.Text.RegularExpressions;
+﻿using SistemaBancarioSimples.Service;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SistemaBancarioSimples
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly IContaService _contaService;
-        // VARIÁVEL DE INSTÂNCIA: Armazena o ID da conta do usuário logado
         private readonly int _contaId;
 
-        // REMOVA esta linha se ela ainda existir:
-        // private const int ContaId = 1; 
-
-        // NOVO CONSTRUTOR: Recebe o ID da conta
         public MainWindow(IContaService contaService, int contaId)
         {
             InitializeComponent();
             _contaService = contaService;
-            _contaId = contaId; // Inicializa a variável
+            _contaId = contaId;
 
             Title = $"Sistema Bancário - Conta ID: {contaId}";
-            AtualizarSaldoAsync();
+
+            // Carrega o saldo inicial
+            _ = AtualizarSaldoAsync();
         }
 
         private async Task AtualizarSaldoAsync()
@@ -36,78 +28,48 @@ namespace SistemaBancarioSimples
             try
             {
                 var conta = await _contaService.GetContaAsync(_contaId);
-                // Formatação simples para mostrar o valor em Reais (R$)
-                SaldoTextBlock.Text = conta.Saldo.ToString("C");
+                SaldoTextBlock.Text = conta.Saldo.ToString("C"); // Atualiza o texto grande
             }
             catch (Exception ex)
             {
-                MensagemTextBlock.Text = $"Erro ao carregar saldo: {ex.Message}";
+                MensagemTextBlock.Text = $"Erro ao atualizar: {ex.Message}";
+                MensagemTextBlock.Foreground = Brushes.Red;
             }
         }
 
-        private async void DepositarButton_Click(object sender, RoutedEventArgs e)
+        // --- EVENTOS DE ABERTURA DE JANELAS ---
+
+        private void DepositarButton_Click(object sender, RoutedEventArgs e)
         {
-            await RealizarTransacaoAsync(TransacaoTipo.Deposito);
+            var window = new DepositoWindow(_contaService, _contaId);
+            window.ShowDialog(); // Trava a tela até fechar
+            _ = AtualizarSaldoAsync(); // Atualiza o saldo na volta
         }
 
-        private async void SacarButton_Click(object sender, RoutedEventArgs e)
+        private void SacarButton_Click(object sender, RoutedEventArgs e)
         {
-            await RealizarTransacaoAsync(TransacaoTipo.Saque);
+            var window = new SaqueWindow(_contaService, _contaId);
+            window.ShowDialog();
+            _ = AtualizarSaldoAsync();
         }
 
-        private async Task RealizarTransacaoAsync(TransacaoTipo tipo)
+        private void RendimentoButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!decimal.TryParse(ValorTextBox.Text, out decimal valor) || valor <= 0)
-            {
-                MensagemTextBlock.Text = "Por favor, insira um valor válido.";
-                return;
-            }
-
-            try
-            {
-                MensagemTextBlock.Text = ""; // Limpa a mensagem anterior
-
-                if (tipo == TransacaoTipo.Deposito)
-                {
-                    await _contaService.DepositarAsync(_contaId, valor);
-                    MensagemTextBlock.Text = $"Depósito de {valor:C} realizado com sucesso!";
-                }
-                else
-                {
-                    await _contaService.SacarAsync(_contaId, valor);
-                    MensagemTextBlock.Text = $"Saque de {valor:C} realizado com sucesso!";
-                }
-
-                // Atualiza a interface
-                ValorTextBox.Clear();
-                await AtualizarSaldoAsync();
-            }
-            catch (InvalidOperationException ex)
-            {
-                MensagemTextBlock.Text = $"Erro na Transação: {ex.Message}";
-            }
-            catch (ArgumentException ex)
-            {
-                MensagemTextBlock.Text = $"Erro de Valor: {ex.Message}";
-            }
-            catch (Exception ex)
-            {
-                MensagemTextBlock.Text = $"Erro Inesperado: {ex.Message}";
-            }
+            var window = new RendimentoWindow();
+            window.ShowDialog();
         }
 
-        // Permite apenas números e um ponto/vírgula
-        private void ValorTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void TransacaoButton_Click(object sender, RoutedEventArgs e)
         {
-            Regex regex = new Regex("[^0-9,.]+"); // Restringe a entrada a números e pontuação decimal
-            e.Handled = regex.IsMatch(e.Text);
+            var window = new TransacaoWindow(_contaService, _contaId);
+            window.ShowDialog();
+            _ = AtualizarSaldoAsync();
         }
 
         private void VerHistoricoButton_Click(object sender, RoutedEventArgs e)
         {
-            // Cria e exibe a janela de histórico
-            var historicoWindow = new HistoricoWindow(_contaService, _contaId);
-            historicoWindow.Show();
+            var window = new HistoricoWindow(_contaService, _contaId);
+            window.ShowDialog();
         }
     }
 }
