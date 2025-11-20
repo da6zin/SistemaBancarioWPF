@@ -3,7 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using SistemaBancarioSimples.Helpers; // <--- Importante
+using SistemaBancarioSimples.Helpers;
 
 namespace SistemaBancarioSimples
 {
@@ -22,7 +22,6 @@ namespace SistemaBancarioSimples
 
         private async void Confirmar_Click(object sender, RoutedEventArgs e)
         {
-            // LIMPEZA: Usando o Helper para converter e validar
             if (!MoedaHelper.TentarConverter(txtValor.Text, out decimal valor))
             {
                 MessageBox.Show("Por favor, insira um valor válido para saque.");
@@ -53,7 +52,6 @@ namespace SistemaBancarioSimples
 
         private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // LIMPEZA: Validando se é número/vírgula pelo Helper
             e.Handled = MoedaHelper.EhTextoInvalido(e.Text);
         }
     }

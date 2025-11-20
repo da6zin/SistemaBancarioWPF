@@ -20,14 +20,12 @@ namespace SistemaBancarioSimples
 
         private async void Confirmar_Click(object sender, RoutedEventArgs e)
         {
-            // 1. LIMPEZA: Valida o valor usando o Helper
             if (!MoedaHelper.TentarConverter(txtValorTransferencia.Text, out decimal valor))
             {
                 MessageBox.Show("Valor inválido. Digite um número positivo.");
                 return;
             }
 
-            // 2. Valida o Usuário (Lógica normal de string)
             string usernameDestino = txtContaDestino.Text;
             if (string.IsNullOrWhiteSpace(usernameDestino))
             {
@@ -53,7 +51,6 @@ namespace SistemaBancarioSimples
             this.Close();
         }
 
-        // Adicione: PreviewTextInput="Valor_PreviewTextInput" no seu TextBox de Valor no XAML da Transação
         private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = MoedaHelper.EhTextoInvalido(e.Text);

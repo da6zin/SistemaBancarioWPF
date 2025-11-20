@@ -14,7 +14,6 @@ namespace SistemaBancarioSimples.Helpers
                 Id = contaModel.Id,
                 Numero = contaModel.Numero,
                 Saldo = contaModel.Saldo,
-                // Aqui pegamos só o nome do usuário, protegendo a senha
                 NomeTitular = contaModel.Usuario != null ? contaModel.Usuario.Username : "Desconhecido"
             };
         }

@@ -15,11 +15,8 @@ namespace SistemaBancarioSimples
         {
             InitializeComponent();
 
-            // Inicializa o contexto
             var context = new BancoContext();
 
-            // GARANTIA FINAL: Cria o banco se não existir (seguro para rodar sempre)
-            // Mas JAMAIS deixe o 'EnsureDeleted' aqui no código final, senão apaga os dados do professor/avaliador!
             context.Database.EnsureCreated();
 
             _authService = new AuthService(context);
@@ -43,13 +40,11 @@ namespace SistemaBancarioSimples
 
                 if (usuarioLogado != null)
                 {
-                    // Login bem-sucedido: Abre a Janela Principal
                     MensagemTextBlock.Text = "Login realizado com sucesso!";
 
-                    // Passa o ID da conta do usuário logado para a MainWindow
                     MainWindow mainWindow = new MainWindow(_contaService, usuarioLogado.ContaBancariaId);
                     mainWindow.Show();
-                    this.Close(); // Fecha a janela de login
+                    this.Close();
                 }
                 else
                 {
@@ -90,7 +85,6 @@ namespace SistemaBancarioSimples
 
         private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
-            // Abre a tela de Admin passando o serviço
             AdminWindow admin = new AdminWindow(_contaService);
             admin.Show();
             this.Close();

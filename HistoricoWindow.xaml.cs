@@ -14,7 +14,6 @@ namespace SistemaBancarioSimples
             _contaService = contaService;
             _contaId = contaId;
 
-            // Chama o carregamento assim que a janela abre
             CarregarHistorico();
         }
 
@@ -22,10 +21,8 @@ namespace SistemaBancarioSimples
         {
             try
             {
-                // AGORA SIM: Usamos o método específico que criamos
                 var transacoes = await _contaService.GetHistoricoAsync(_contaId);
 
-                // Joga a lista direto no Grid
                 TransacoesDataGrid.ItemsSource = transacoes;
             }
             catch (System.Exception ex)

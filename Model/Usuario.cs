@@ -10,9 +10,7 @@ namespace SistemaBancarioSimples.Model
     {
         public int Id { get; set; }
         public string Username { get; set; }
-        public string PasswordHash { get; set; } // Armazenar senha com hash
-
-        // Relacionamento 1 para 1: Um Usuário tem uma Conta Bancária
+        public string PasswordHash { get; set; }
         public ContaBancaria Conta { get; set; }
         public int ContaBancariaId { get; set; }
     }

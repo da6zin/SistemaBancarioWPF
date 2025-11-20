@@ -10,7 +10,7 @@ namespace SistemaBancarioSimples
     public partial class AdminWindow : Window
     {
         private readonly IContaService _contaService;
-        private List<ContaDTO> _todasContas; // Guarda a lista completa na memória
+        private List<ContaDTO> _todasContas;
 
         public AdminWindow(IContaService contaService)
         {
@@ -21,10 +21,7 @@ namespace SistemaBancarioSimples
 
         private async void CarregarDados()
         {
-            // Busca todos os clientes do banco
             _todasContas = await _contaService.GetTodasContasAsync();
-
-            // Joga na tela
             GridClientes.ItemsSource = _todasContas;
         }
 
@@ -33,7 +30,6 @@ namespace SistemaBancarioSimples
         {
             string texto = txtBusca.Text.ToLower();
 
-            // Filtra a lista original por Nome ou Número da conta
             var listaFiltrada = _todasContas.Where(c =>
                 c.NomeTitular.ToLower().Contains(texto) ||
                 c.Numero.Contains(texto)
@@ -42,13 +38,12 @@ namespace SistemaBancarioSimples
             GridClientes.ItemsSource = listaFiltrada;
         }
 
+
         // QUANDO CLICA EM UM CLIENTE
         private async void GridClientes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Verifica qual linha foi clicada
             if (GridClientes.SelectedItem is ContaDTO contaSelecionada)
             {
-                // Busca o histórico daquela conta específica
                 var historico = await _contaService.GetHistoricoAsync(contaSelecionada.Id);
                 GridHistorico.ItemsSource = historico;
             }

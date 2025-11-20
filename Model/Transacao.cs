@@ -12,11 +12,7 @@ namespace SistemaBancarioSimples.Model
         public decimal Valor { get; set; }
         public DateTime DataHora { get; set; }
         public TransacaoTipo Tipo { get; set; }
-
-        // --- ADICIONE ESTA LINHA AQUI: ---
         public string Descricao { get; set; }
-        // ---------------------------------
-
         public int ContaBancariaId { get; set; }
         public ContaBancaria Conta { get; set; }
     }

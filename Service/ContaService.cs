@@ -12,7 +12,6 @@ namespace SistemaBancarioSimples.Service
 {
     public class ContaService : IContaService
     {
-        // Padrão de Injeção de Dependência (Princípio D - Inversão de Dependência)
         private readonly BancoContext _context;
 
         public ContaService(BancoContext context)
@@ -20,16 +19,15 @@ namespace SistemaBancarioSimples.Service
             _context = context;
         }
 
-
+        // OBTER DADOS DA CONTA
         public async Task<ContaDTO> GetContaAsync(int id)
         {
             var contaModel = await _context.Contas
-                                           .Include(c => c.Usuario) // Traz o usuário para pegarmos o nome
+                                           .Include(c => c.Usuario)
                                            .FirstOrDefaultAsync(c => c.Id == id);
-
-            // Usa o Mapper para converter antes de entregar para quem pediu
             return ContaMapper.ParaDTO(contaModel);
         }
+
 
         // DEPOSITAR
         public async Task DepositarAsync(int contaId, decimal valor)
@@ -37,15 +35,13 @@ namespace SistemaBancarioSimples.Service
             var conta = await _context.Contas.FindAsync(contaId);
             if (conta == null) throw new Exception("Conta não encontrada.");
 
-            // 1. ATUALIZA O SALDO (Isso estava faltando antes?)
             conta.Saldo += valor;
 
-            // 2. CRIA A TRANSAÇÃO (Usando a classe genérica e Enum)
             var transacao = new Transacao
             {
                 ContaBancariaId = contaId,
                 Valor = valor,
-                Tipo = TransacaoTipo.Deposito, // Enum
+                Tipo = TransacaoTipo.Deposito,
                 DataHora = DateTime.Now,
                 Descricao = "Depósito em Dinheiro"
             };
@@ -60,14 +56,12 @@ namespace SistemaBancarioSimples.Service
             var conta = await _context.Contas.FindAsync(contaId);
             if (conta.Saldo < valor) throw new InvalidOperationException("Saldo insuficiente.");
 
-            // 1. TIRA O SALDO
             conta.Saldo -= valor;
 
-            // 2. CRIA A TRANSAÇÃO
             var transacao = new Transacao
             {
                 ContaBancariaId = contaId,
-                Valor = valor * -1, // Negativo
+                Valor = valor * -1,
                 Tipo = TransacaoTipo.Saque,
                 DataHora = DateTime.Now,
                 Descricao = "Saque em Conta"
@@ -77,20 +71,17 @@ namespace SistemaBancarioSimples.Service
             await _context.SaveChangesAsync();
         }
 
-
-        // Certifique-se de ter: using Microsoft.EntityFrameworkCore;
-
+        // HISTÓRICO DE TRANSAÇÕES
         public async Task<List<Transacao>> GetHistoricoAsync(int contaId)
         {
-            // Busca na tabela de Transações onde o ContaId for igual ao do usuário
             return await _context.Transacoes
                                  .Where(t => t.ContaBancariaId == contaId)
-                                 .OrderByDescending(t => t.DataHora) // Ordena do mais recente para o antigo
+                                 .OrderByDescending(t => t.DataHora)
                                  .ToListAsync();
         }
 
 
-        // TRANSFERIR
+        // TRANSFERÊNCIA
         public async Task TransferirAsync(int contaOrigemId, string usernameDestino, decimal valor)
         {
             var contaOrigem = await _context.Contas.FindAsync(contaOrigemId);
@@ -101,11 +92,9 @@ namespace SistemaBancarioSimples.Service
             if (contaDestino == null) throw new Exception("Destinatário não encontrado.");
             if (contaOrigem.Saldo < valor) throw new InvalidOperationException("Saldo insuficiente.");
 
-            // 1. MOVE O DINHEIRO
             contaOrigem.Saldo -= valor;
             contaDestino.Saldo += valor;
 
-            // 2. REGISTRA SAÍDA (Origem)
             var tSaida = new Transacao
             {
                 ContaBancariaId = contaOrigem.Id,
@@ -115,7 +104,6 @@ namespace SistemaBancarioSimples.Service
                 Descricao = $"Enviado para {usernameDestino}"
             };
 
-            // 3. REGISTRA ENTRADA (Destino)
             var tEntrada = new Transacao
             {
                 ContaBancariaId = contaDestino.Id,
@@ -131,39 +119,34 @@ namespace SistemaBancarioSimples.Service
             await _context.SaveChangesAsync();
         }
 
+
+        // EXCLUIR CONTA
         public async Task ExcluirContaAsync(int contaId)
         {
-            // 1. Busca a conta e INCLUI o Usuário dono dela
             var conta = await _context.Contas
-                                      .Include(c => c.Usuario) // Importante para apagar o login também
+                                      .Include(c => c.Usuario) 
                                       .FirstOrDefaultAsync(c => c.Id == contaId);
 
             if (conta == null) throw new Exception("Conta não encontrada.");
 
-            // 2. (Opcional) Regra de Negócio: Não deixar apagar se tiver saldo positivo
-            // if (conta.Saldo > 0) throw new InvalidOperationException("Saque todo o saldo antes de encerrar a conta.");
-
-            // 3. Remove a Conta
             _context.Contas.Remove(conta);
 
-            // 4. Remove o Usuário (Login) associado
             if (conta.Usuario != null)
             {
                 _context.Usuarios.Remove(conta.Usuario);
             }
 
-            // 5. Salva e confirma a exclusão no banco
             await _context.SaveChangesAsync();
         }
 
+
+        // LISTAR TODAS AS CONTAS (ADMIN)
         public async Task<List<ContaDTO>> GetTodasContasAsync()
         {
             var contas = await _context.Contas
-                                       .Include(c => c.Usuario) // Traz o usuário junto para saber o nome
+                                       .Include(c => c.Usuario)
                                        .ToListAsync();
 
-            // Converte a lista de Contas do banco para uma lista de DTOs (seguro)
-            // Usamos o Select do LINQ para converter um por um
             return contas.Select(c => ContaMapper.ParaDTO(c)).ToList();
         }
     }

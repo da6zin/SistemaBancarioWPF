@@ -14,7 +14,6 @@ namespace SistemaBancarioSimples
         private readonly int _contaId;
         private decimal _saldoInicial = 0;
 
-        // Variável para guardar o lucro calculado até o usuário decidir aplicar
         private decimal _lucroParaAplicar = 0;
 
         public RendimentoWindow(IContaService contaService, int contaId)
@@ -25,7 +24,6 @@ namespace SistemaBancarioSimples
             _ = CarregarSaldoAsync();
         }
 
-        //teste
         private async System.Threading.Tasks.Task CarregarSaldoAsync()
         {
             try
@@ -44,10 +42,6 @@ namespace SistemaBancarioSimples
         {
             decimal aporteMensal = 0;
 
-            // LÓGICA INTELIGENTE:
-            // Se tiver texto, tenta converter com o Helper. 
-            // Se o Helper falhar (texto inválido), avisa.
-            // Se estiver vazio, ignora e mantém 0.
             if (!string.IsNullOrWhiteSpace(txtAporteMensal.Text))
             {
                 if (!MoedaHelper.TentarConverter(txtAporteMensal.Text, out aporteMensal))
@@ -57,14 +51,12 @@ namespace SistemaBancarioSimples
                 }
             }
 
-            // Validação dos Meses (Número Inteiro - Lógica separada pois não é moeda)
             if (!int.TryParse(txtMeses.Text, out int meses) || meses <= 0)
             {
                 MessageBox.Show("Digite uma quantidade válida de meses.");
                 return;
             }
 
-            // Cálculo (1% ao mês)
             decimal taxaMensal = 0.01M;
             decimal saldoFuturo = _saldoInicial;
             decimal totalInvestido = _saldoInicial;
@@ -76,35 +68,29 @@ namespace SistemaBancarioSimples
                 saldoFuturo += (saldoFuturo * taxaMensal);
             }
 
-            // Armazena o lucro na variável global da janela
             _lucroParaAplicar = saldoFuturo - totalInvestido;
 
-            // Atualiza a tela
             txtResultadoLucro.Text = _lucroParaAplicar.ToString("C");
             txtResultadoTotal.Text = saldoFuturo.ToString("C");
 
-            // MOSTRA O BOTÃO DE APLICAR se houver lucro
             if (_lucroParaAplicar > 0)
             {
                 btnAplicar.Visibility = Visibility.Visible;
             }
         }
 
-        // --- NOVO MÉTODO: Aplica o dinheiro na conta ---
         private async void Aplicar_Click(object sender, RoutedEventArgs e)
         {
             if (_lucroParaAplicar <= 0) return;
 
             try
             {
-                // Reutiliza o método de depósito para adicionar o dinheiro
-                // Isso é ótimo porque já gera histórico de transação automaticamente!
                 await _contaService.DepositarAsync(_contaId, _lucroParaAplicar);
 
                 MessageBox.Show($"Parabéns! O rendimento de {_lucroParaAplicar:C} foi creditado na sua conta.",
                                 "Resgate Realizado", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                this.Close(); // Fecha a janela para voltar ao menu principal
+                this.Close();
             }
             catch (Exception ex)
             {
