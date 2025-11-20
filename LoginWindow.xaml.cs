@@ -14,14 +14,13 @@ namespace SistemaBancarioSimples
         public LoginWindow()
         {
             InitializeComponent();
+
+            // Inicializa o contexto
             var context = new BancoContext();
 
-
-            // PARA APAGAR O BANCO DE DADOS A CADA RODADA DE TESTE, DESCOMENTE AS LINHAS ABAIXO:
-
-            //context.Database.EnsureDeleted();
-            //context.Database.EnsureCreated();
-
+            // GARANTIA FINAL: Cria o banco se não existir (seguro para rodar sempre)
+            // Mas JAMAIS deixe o 'EnsureDeleted' aqui no código final, senão apaga os dados do professor/avaliador!
+            context.Database.EnsureCreated();
 
             _authService = new AuthService(context);
             _contaService = new ContaService(context);
