@@ -53,10 +53,18 @@ namespace SistemaBancarioSimples
             _ = AtualizarSaldoAsync();
         }
 
+        // Arquivo: MainWindow.xaml.cs
+
         private void RendimentoButton_Click(object sender, RoutedEventArgs e)
         {
-            var window = new RendimentoWindow();
+            // 1. Cria e abre a janela
+            var window = new RendimentoWindow(_contaService, _contaId);
+
+            // 2. O 'ShowDialog' trava o código aqui até o usuário fechar a janela de rendimento
             window.ShowDialog();
+
+            // 3. ASSIM QUE FECHAR, essa linha roda e busca o saldo novo no banco
+            _ = AtualizarSaldoAsync();
         }
 
         private void TransacaoButton_Click(object sender, RoutedEventArgs e)
