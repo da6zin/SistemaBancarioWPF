@@ -1,6 +1,8 @@
 ﻿using SistemaBancarioSimples.Service;
 using System;
 using System.Windows;
+using SistemaBancarioSimples.Helpers;
+using System.Windows.Input;
 
 namespace SistemaBancarioSimples
 {
@@ -18,44 +20,43 @@ namespace SistemaBancarioSimples
 
         private async void Confirmar_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Tratamento robusto para valor (troca ponto por vírgula se necessário)
-            string valorTexto = txtValorTransferencia.Text.Replace(".", ",");
-
-            if (!decimal.TryParse(valorTexto, out decimal valor) || valor <= 0)
+            // 1. LIMPEZA: Valida o valor usando o Helper
+            if (!MoedaHelper.TentarConverter(txtValorTransferencia.Text, out decimal valor))
             {
-                MessageBox.Show("Valor inválido. Digite um valor numérico positivo.");
+                MessageBox.Show("Valor inválido. Digite um número positivo.");
                 return;
             }
 
-            // 2. Pega o NOME DO USUÁRIO (já que seu modelo usa Usuario e não Numero da Conta)
+            // 2. Valida o Usuário (Lógica normal de string)
             string usernameDestino = txtContaDestino.Text;
-
             if (string.IsNullOrWhiteSpace(usernameDestino))
             {
-                MessageBox.Show("Por favor, digite o nome do usuário que receberá a transferência.");
+                MessageBox.Show("Por favor, digite o nome do usuário de destino.");
                 return;
             }
 
             try
             {
-                // 3. AQUI A MÁGICA ACONTECE: Chama o serviço real
-                // Note que passamos 'usernameDestino' (string) em vez de número de conta
                 await _contaService.TransferirAsync(_contaOrigemId, usernameDestino, valor);
 
-                // 4. Feedback e Fechamento
-                MessageBox.Show($"Transferência de {valor:C} para {usernameDestino} realizada com sucesso!", "Sucesso");
+                MessageBox.Show($"Transferência de {valor:C} para {usernameDestino} realizada!", "Sucesso");
                 this.Close();
             }
             catch (Exception ex)
             {
-                // Se o usuário não existir ou não tiver saldo, o erro aparecerá aqui
-                MessageBox.Show($"Não foi possível transferir: {ex.Message}", "Erro");
+                MessageBox.Show($"Erro na transferência: {ex.Message}");
             }
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        // Adicione: PreviewTextInput="Valor_PreviewTextInput" no seu TextBox de Valor no XAML da Transação
+        private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = MoedaHelper.EhTextoInvalido(e.Text);
         }
     }
 }

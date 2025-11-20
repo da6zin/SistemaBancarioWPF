@@ -3,6 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using SistemaBancarioSimples.Helpers; // <--- Importante
 
 namespace SistemaBancarioSimples
 {
@@ -21,11 +22,10 @@ namespace SistemaBancarioSimples
 
         private async void Confirmar_Click(object sender, RoutedEventArgs e)
         {
-            string valorTexto = txtValor.Text.Replace(".", ",");
-
-            if (!decimal.TryParse(valorTexto, out decimal valor) || valor <= 0)
+            // LIMPEZA: Usando o Helper para converter e validar
+            if (!MoedaHelper.TentarConverter(txtValor.Text, out decimal valor))
             {
-                MessageBox.Show("Por favor, insira um valor válido.");
+                MessageBox.Show("Por favor, insira um valor válido para saque.");
                 return;
             }
 
@@ -33,16 +33,16 @@ namespace SistemaBancarioSimples
             {
                 await _contaService.SacarAsync(_contaId, valor);
 
-                MessageBox.Show($"Saque de {valor:C} realizado. Retire o dinheiro.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Saque de {valor:C} realizado. Retire o dinheiro.", "Sucesso");
                 this.Close();
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show($"Não foi possível sacar: {ex.Message}", "Saldo Insuficiente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Não foi possível sacar: {ex.Message}", "Atenção");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao sacar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao sacar: {ex.Message}");
             }
         }
 
@@ -53,8 +53,8 @@ namespace SistemaBancarioSimples
 
         private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9,.]+");
-            e.Handled = regex.IsMatch(e.Text);
+            // LIMPEZA: Validando se é número/vírgula pelo Helper
+            e.Handled = MoedaHelper.EhTextoInvalido(e.Text);
         }
     }
 }

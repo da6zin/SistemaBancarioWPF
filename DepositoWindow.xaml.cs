@@ -3,6 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using SistemaBancarioSimples.Helpers; // Importa nosso novo ajudante
 
 namespace SistemaBancarioSimples
 {
@@ -27,9 +28,9 @@ namespace SistemaBancarioSimples
             // Tratamento de Ponto/Vírgula
             string valorTexto = txtValor.Text.Replace(".", ",");
 
-            if (!decimal.TryParse(valorTexto, out decimal valor) || valor <= 0)
+            if (!MoedaHelper.TentarConverter(txtValor.Text, out decimal valor))
             {
-                MessageBox.Show("Por favor, insira um valor válido maior que zero.");
+                MessageBox.Show("Valor inválido.");
                 return;
             }
 
@@ -55,8 +56,8 @@ namespace SistemaBancarioSimples
         // Permite apenas números e vírgula/ponto
         private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9,.]+");
-            e.Handled = regex.IsMatch(e.Text);
+            // Olha como ficou legível! Não tem mais Regex espalhado no código.
+            e.Handled = MoedaHelper.EhTextoInvalido(e.Text);
         }
     }
 }

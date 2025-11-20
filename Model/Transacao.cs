@@ -9,13 +9,16 @@ namespace SistemaBancarioSimples.Model
     public class Transacao
     {
         public int Id { get; set; }
-        public DateTime DataHora { get; set; } = DateTime.Now;
-        public TransacaoTipo Tipo { get; set; } // Enum: Deposito ou Saque
         public decimal Valor { get; set; }
+        public DateTime DataHora { get; set; }
+        public TransacaoTipo Tipo { get; set; }
 
-        // Chave estrangeira para a conta
+        // --- ADICIONE ESTA LINHA AQUI: ---
+        public string Descricao { get; set; }
+        // ---------------------------------
+
         public int ContaBancariaId { get; set; }
-        public ContaBancaria ContaBancaria { get; set; } // Propriedade de navegação
+        public ContaBancaria Conta { get; set; }
     }
 
     public enum TransacaoTipo

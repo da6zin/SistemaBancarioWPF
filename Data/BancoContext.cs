@@ -1,45 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SistemaBancarioSimples.Model;
-using System.IO;
-using System;
 
 namespace SistemaBancarioSimples.Data
 {
     public class BancoContext : DbContext
     {
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<ContaBancaria> Contas { get; set; }
         public DbSet<Transacao> Transacoes { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
 
-        private readonly string _dbPath;
-
-        // 1. Construtor Padrão (Usado em tempo de execução na UI)
+        // 1. CONSTRUTOR VAZIO (Para quando você faz 'new BancoContext()')
         public BancoContext()
         {
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            _dbPath = Path.Join(folder, "banco_simples.db");
         }
 
-        // 2. NOVO: Construtor que aceita opções (Usado pela Fábrica para Migrações)
-        // Isso resolve o erro "No database provider has been configured"
+        // 2. CONSTRUTOR COM OPÇÕES (O que estava faltando!)
+        // Aceita configurações externas se necessário
         public BancoContext(DbContextOptions<BancoContext> options) : base(options)
         {
-            // Não precisamos definir _dbPath ou chamar OnConfiguring aqui, pois as opções
-            // já foram configuradas e passadas pelo IDesignTimeDbContextFactory.
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Aplica a configuração padrão SOMENTE se nenhuma opção já tiver sido fornecida
+            // Verifica se já foi configurado externamente (pelo construtor 2)
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlite($"Data Source={_dbPath}");
+                optionsBuilder.UseSqlite("Data Source=banco_final.db");
             }
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // ... (configurações existentes)
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SistemaBancarioSimples.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sistema Bancário Simples" Height="455" Width="800">
+        Title="Sistema Bancário Simples" Height="600" Width="800">
 
     <Grid Background="#F5F5F5">
         <Grid.RowDefinitions>
@@ -64,6 +64,20 @@
                         Background="Transparent" Foreground="#666" BorderThickness="0" HorizontalAlignment="Right" Style="{x:Null}" Cursor="Hand"/>
 
                 <TextBlock x:Name="MensagemTextBlock" Margin="0,15,0,0" TextAlignment="Center" TextWrapping="Wrap"/>
+
+                <Separator Background="#DDD" Margin="0,20,0,20"/>
+
+                <TextBlock Text="Zona de Perigo" Foreground="Red" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <Button Content="ENCERRAR CONTA" Click="ExcluirContaButton_Click" 
+        Background="Transparent" Foreground="Red" BorderBrush="Red" BorderThickness="1" 
+        Height="35" FontWeight="Bold" Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
             </StackPanel>
         </ScrollViewer>
     </Grid>

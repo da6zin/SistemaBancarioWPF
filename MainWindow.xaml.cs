@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using SistemaBancarioSimples.DTOs;
 
 namespace SistemaBancarioSimples
 {
@@ -27,21 +28,22 @@ namespace SistemaBancarioSimples
         {
             try
             {
-                // Busca os dados da conta (incluindo o Numero agora)
-                var conta = await _contaService.GetContaAsync(_contaId);
+                // Agora a variável 'conta' é um DTO, não mais o Model do banco!
+                ContaDTO conta = await _contaService.GetContaAsync(_contaId);
 
-                // Atualiza o Saldo
-                SaldoTextBlock.Text = conta.Saldo.ToString("C");
+                if (conta != null)
+                {
+                    SaldoTextBlock.Text = conta.Saldo.ToString("C");
 
-                // NOVO: Atualiza o Número da Conta
-                // Se o número for nulo (contas antigas), mostra um padrão
-                string numero = string.IsNullOrEmpty(conta.Numero) ? "Sem Número" : conta.Numero;
-                txtNumeroConta.Text = $"Conta: {numero}";
+                    string numero = string.IsNullOrEmpty(conta.Numero) ? "S/N" : conta.Numero;
+
+                    // BÔNUS: Agora podemos mostrar o nome do titular também!
+                    txtNumeroConta.Text = $"Conta: {numero} | Olá, {conta.NomeTitular}";
+                }
             }
             catch (Exception ex)
             {
-                MensagemTextBlock.Text = $"Erro ao atualizar: {ex.Message}";
-                MensagemTextBlock.Foreground = Brushes.Red;
+                MensagemTextBlock.Text = $"Erro: {ex.Message}";
             }
         }
 
@@ -103,6 +105,36 @@ namespace SistemaBancarioSimples
 
                 // 3. Fecha a janela do banco
                 this.Close();
+            }
+        }
+
+        private async void ExcluirContaButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Confirmação de segurança
+            var resultado = MessageBox.Show(
+                "Tem certeza que deseja encerrar sua conta?\nEssa ação é irreversível e todos os seus dados serão apagados.",
+                "Encerrar Conta",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (resultado == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    // 2. Chama o serviço para apagar tudo
+                    await _contaService.ExcluirContaAsync(_contaId);
+
+                    MessageBox.Show("Sua conta foi encerrada. Sentiremos sua falta!", "Conta Excluída");
+
+                    // 3. Redireciona para o Login (já que o usuário atual não existe mais)
+                    LoginWindow login = new LoginWindow();
+                    login.Show();
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao excluir conta: {ex.Message}");
+                }
             }
         }
     }

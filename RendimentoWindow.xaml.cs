@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using SistemaBancarioSimples.Helpers;
 
 namespace SistemaBancarioSimples
 {
@@ -41,9 +42,22 @@ namespace SistemaBancarioSimples
 
         private void Simular_Click(object sender, RoutedEventArgs e)
         {
-            string textoAporte = txtAporteMensal.Text.Replace(".", ",");
-            decimal.TryParse(textoAporte, out decimal aporteMensal);
+            decimal aporteMensal = 0;
 
+            // LÓGICA INTELIGENTE:
+            // Se tiver texto, tenta converter com o Helper. 
+            // Se o Helper falhar (texto inválido), avisa.
+            // Se estiver vazio, ignora e mantém 0.
+            if (!string.IsNullOrWhiteSpace(txtAporteMensal.Text))
+            {
+                if (!MoedaHelper.TentarConverter(txtAporteMensal.Text, out aporteMensal))
+                {
+                    MessageBox.Show("Valor do aporte inválido.");
+                    return;
+                }
+            }
+
+            // Validação dos Meses (Número Inteiro - Lógica separada pois não é moeda)
             if (!int.TryParse(txtMeses.Text, out int meses) || meses <= 0)
             {
                 MessageBox.Show("Digite uma quantidade válida de meses.");
@@ -105,8 +119,7 @@ namespace SistemaBancarioSimples
 
         private void Valor_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9,.]+");
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = MoedaHelper.EhTextoInvalido(e.Text);
         }
 
         private void Numero_PreviewTextInput(object sender, TextCompositionEventArgs e)

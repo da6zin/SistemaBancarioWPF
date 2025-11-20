@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using SistemaBancarioSimples.DTOs;
+using SistemaBancarioSimples.Helpers;
 
 namespace SistemaBancarioSimples.Service
 {
@@ -18,52 +20,57 @@ namespace SistemaBancarioSimples.Service
             _context = context;
         }
 
-        public async Task<ContaBancaria> GetContaAsync(int id)
+
+        public async Task<ContaDTO> GetContaAsync(int id)
         {
-            // Busca a conta e garante que a conta inicial exista
-            return await _context.Contas.FirstOrDefaultAsync(c => c.Id == id)
-                   ?? throw new InvalidOperationException("Conta não encontrada.");
+            var contaModel = await _context.Contas
+                                           .Include(c => c.Usuario) // Traz o usuário para pegarmos o nome
+                                           .FirstOrDefaultAsync(c => c.Id == id);
+
+            // Usa o Mapper para converter antes de entregar para quem pediu
+            return ContaMapper.ParaDTO(contaModel);
         }
 
+        // DEPOSITAR
         public async Task DepositarAsync(int contaId, decimal valor)
         {
-            if (valor <= 0)
-                throw new ArgumentException("O valor do depósito deve ser positivo.");
+            var conta = await _context.Contas.FindAsync(contaId);
+            if (conta == null) throw new Exception("Conta não encontrada.");
 
-            var conta = await GetContaAsync(contaId);
-
-            // Lógica de negócio
+            // 1. ATUALIZA O SALDO (Isso estava faltando antes?)
             conta.Saldo += valor;
 
+            // 2. CRIA A TRANSAÇÃO (Usando a classe genérica e Enum)
             var transacao = new Transacao
             {
                 ContaBancariaId = contaId,
                 Valor = valor,
-                Tipo = TransacaoTipo.Deposito
+                Tipo = TransacaoTipo.Deposito, // Enum
+                DataHora = DateTime.Now,
+                Descricao = "Depósito em Dinheiro"
             };
 
             _context.Transacoes.Add(transacao);
             await _context.SaveChangesAsync();
         }
 
+        // SACAR
         public async Task SacarAsync(int contaId, decimal valor)
         {
-            if (valor <= 0)
-                throw new ArgumentException("O valor do saque deve ser positivo.");
+            var conta = await _context.Contas.FindAsync(contaId);
+            if (conta.Saldo < valor) throw new InvalidOperationException("Saldo insuficiente.");
 
-            var conta = await GetContaAsync(contaId);
-
-            if (conta.Saldo < valor)
-                throw new InvalidOperationException("Saldo insuficiente.");
-
-            // Lógica de negócio
+            // 1. TIRA O SALDO
             conta.Saldo -= valor;
 
+            // 2. CRIA A TRANSAÇÃO
             var transacao = new Transacao
             {
                 ContaBancariaId = contaId,
-                Valor = valor,
-                Tipo = TransacaoTipo.Saque
+                Valor = valor * -1, // Negativo
+                Tipo = TransacaoTipo.Saque,
+                DataHora = DateTime.Now,
+                Descricao = "Saque em Conta"
             };
 
             _context.Transacoes.Add(transacao);
@@ -83,61 +90,71 @@ namespace SistemaBancarioSimples.Service
         }
 
 
+        // TRANSFERIR
         public async Task TransferirAsync(int contaOrigemId, string usernameDestino, decimal valor)
         {
-            // 1. Busca a conta de origem
             var contaOrigem = await _context.Contas.FindAsync(contaOrigemId);
-
-            // 2. BUSCA A CONTA DE DESTINO PELO NOME DO USUÁRIO
-            // O ".Include" carrega os dados do Usuário junto com a Conta
             var contaDestino = await _context.Contas
                                              .Include(c => c.Usuario)
                                              .FirstOrDefaultAsync(c => c.Usuario.Username == usernameDestino);
 
-            // --- VALIDAÇÕES ---
-            if (contaDestino == null)
-            {
-                throw new Exception($"Usuário '{usernameDestino}' não encontrado.");
-            }
+            if (contaDestino == null) throw new Exception("Destinatário não encontrado.");
+            if (contaOrigem.Saldo < valor) throw new InvalidOperationException("Saldo insuficiente.");
 
-            if (contaOrigem.Id == contaDestino.Id)
-            {
-                throw new Exception("Você não pode transferir para si mesmo.");
-            }
-
-            if (contaOrigem.Saldo < valor)
-            {
-                throw new InvalidOperationException("Saldo insuficiente.");
-            }
-
-            // --- OPERAÇÃO MATEMÁTICA ---
+            // 1. MOVE O DINHEIRO
             contaOrigem.Saldo -= valor;
             contaDestino.Saldo += valor;
 
-            // --- CRIA O EXTRATO (HISTÓRICO) ---
-
-            // Saída (Para quem enviou)
-            var transacaoSaida = new Transacao
+            // 2. REGISTRA SAÍDA (Origem)
+            var tSaida = new Transacao
             {
                 ContaBancariaId = contaOrigem.Id,
-                Valor = valor * -1, // Negativo para indicar saída
+                Valor = valor * -1,
                 Tipo = TransacaoTipo.Transferencia,
-                DataHora = DateTime.Now
+                DataHora = DateTime.Now,
+                Descricao = $"Enviado para {usernameDestino}"
             };
 
-            // Entrada (Para quem recebeu)
-            var transacaoEntrada = new Transacao
+            // 3. REGISTRA ENTRADA (Destino)
+            var tEntrada = new Transacao
             {
                 ContaBancariaId = contaDestino.Id,
-                Valor = valor, // Positivo
+                Valor = valor,
                 Tipo = TransacaoTipo.Transferencia,
-                DataHora = DateTime.Now
+                DataHora = DateTime.Now,
+                Descricao = $"Recebido de {contaOrigem.Usuario?.Username ?? "Desconhecido"}"
             };
 
-            _context.Transacoes.Add(transacaoSaida);
-            _context.Transacoes.Add(transacaoEntrada);
+            _context.Transacoes.Add(tSaida);
+            _context.Transacoes.Add(tEntrada);
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task ExcluirContaAsync(int contaId)
+        {
+            // 1. Busca a conta e INCLUI o Usuário dono dela
+            var conta = await _context.Contas
+                                      .Include(c => c.Usuario) // Importante para apagar o login também
+                                      .FirstOrDefaultAsync(c => c.Id == contaId);
+
+            if (conta == null) throw new Exception("Conta não encontrada.");
+
+            // 2. (Opcional) Regra de Negócio: Não deixar apagar se tiver saldo positivo
+            // if (conta.Saldo > 0) throw new InvalidOperationException("Saque todo o saldo antes de encerrar a conta.");
+
+            // 3. Remove a Conta
+            _context.Contas.Remove(conta);
+
+            // 4. Remove o Usuário (Login) associado
+            if (conta.Usuario != null)
+            {
+                _context.Usuarios.Remove(conta.Usuario);
+            }
+
+            // 5. Salva e confirma a exclusão no banco
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
