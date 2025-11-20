@@ -21,6 +21,7 @@ namespace SistemaBancarioSimples.Model
     public enum TransacaoTipo
     {
         Deposito,
-        Saque
+        Saque,
+        Transferencia
     }
 }

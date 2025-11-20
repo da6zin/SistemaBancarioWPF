@@ -81,5 +81,63 @@ namespace SistemaBancarioSimples.Service
                                  .OrderByDescending(t => t.DataHora) // Ordena do mais recente para o antigo
                                  .ToListAsync();
         }
+
+
+        public async Task TransferirAsync(int contaOrigemId, string usernameDestino, decimal valor)
+        {
+            // 1. Busca a conta de origem
+            var contaOrigem = await _context.Contas.FindAsync(contaOrigemId);
+
+            // 2. BUSCA A CONTA DE DESTINO PELO NOME DO USUÁRIO
+            // O ".Include" carrega os dados do Usuário junto com a Conta
+            var contaDestino = await _context.Contas
+                                             .Include(c => c.Usuario)
+                                             .FirstOrDefaultAsync(c => c.Usuario.Username == usernameDestino);
+
+            // --- VALIDAÇÕES ---
+            if (contaDestino == null)
+            {
+                throw new Exception($"Usuário '{usernameDestino}' não encontrado.");
+            }
+
+            if (contaOrigem.Id == contaDestino.Id)
+            {
+                throw new Exception("Você não pode transferir para si mesmo.");
+            }
+
+            if (contaOrigem.Saldo < valor)
+            {
+                throw new InvalidOperationException("Saldo insuficiente.");
+            }
+
+            // --- OPERAÇÃO MATEMÁTICA ---
+            contaOrigem.Saldo -= valor;
+            contaDestino.Saldo += valor;
+
+            // --- CRIA O EXTRATO (HISTÓRICO) ---
+
+            // Saída (Para quem enviou)
+            var transacaoSaida = new Transacao
+            {
+                ContaBancariaId = contaOrigem.Id,
+                Valor = valor * -1, // Negativo para indicar saída
+                Tipo = TransacaoTipo.Transferencia,
+                DataHora = DateTime.Now
+            };
+
+            // Entrada (Para quem recebeu)
+            var transacaoEntrada = new Transacao
+            {
+                ContaBancariaId = contaDestino.Id,
+                Valor = valor, // Positivo
+                Tipo = TransacaoTipo.Transferencia,
+                DataHora = DateTime.Now
+            };
+
+            _context.Transacoes.Add(transacaoSaida);
+            _context.Transacoes.Add(transacaoEntrada);
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

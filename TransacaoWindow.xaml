@@ -18,7 +18,7 @@
         </Border>
 
         <StackPanel Grid.Row="1" Margin="30">
-            <TextBlock Text="Conta de Destino (Ex: 12345):" Foreground="#555" Margin="0,0,0,5"/>
+            <TextBlock Text="Nome do Usuário de Destino:" Foreground="#555" Margin="0,0,0,5"/>
             <TextBox x:Name="txtContaDestino" Height="35" VerticalContentAlignment="Center" Margin="0,0,0,15"/>
 
             <TextBlock Text="Valor (R$):" Foreground="#555" Margin="0,0,0,5"/>

@@ -14,9 +14,15 @@ namespace SistemaBancarioSimples
         public LoginWindow()
         {
             InitializeComponent();
-
-            // Inicialização dos serviços (Injeção de Dependência simples)
             var context = new BancoContext();
+
+
+            // PARA APAGAR O BANCO DE DADOS A CADA RODADA DE TESTE, DESCOMENTE AS LINHAS ABAIXO:
+
+            //context.Database.EnsureDeleted();
+            //context.Database.EnsureCreated();
+
+
             _authService = new AuthService(context);
             _contaService = new ContaService(context);
         }

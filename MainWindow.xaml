@@ -10,10 +10,21 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="#FF002A8D" Height="80">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="$" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,0,10,0"/>
-                <TextBlock Text="Internet Banking" Foreground="White" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
-            </StackPanel>
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="$" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,0,10,0"/>
+                    <TextBlock Text="Internet Banking" Foreground="White" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Click="LogoutButton_Click" 
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0"
+                        Background="Transparent" BorderThickness="0" Cursor="Hand" Style="{x:Null}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="SAIR" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text=" ➜" Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -26,7 +37,7 @@
                     <StackPanel Margin="20">
                         <TextBlock Text="Saldo Disponível" Foreground="Gray"/>
                         <TextBlock x:Name="SaldoTextBlock" Text="R$ ---" FontSize="28" FontWeight="Bold" Foreground="#FF002A8D" Margin="0,5,0,0"/>
-                        <TextBlock Text="Conta: 123456" Foreground="#888" FontSize="12" Margin="0,5,0,0"/>
+                        <TextBlock x:Name="txtNumeroConta" Text="Conta: ---" Foreground="#888" FontSize="12" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
 

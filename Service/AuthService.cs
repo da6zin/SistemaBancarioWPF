@@ -26,8 +26,25 @@ namespace SistemaBancarioSimples.Service
                 throw new InvalidOperationException("Nome de usuário já está em uso.");
             }
 
-            // 2. Criar a Conta Bancária
-            var novaConta = new ContaBancaria { Saldo = 0m };
+
+
+
+            // Dentro do método CadastrarAsync...
+
+            // 1. Gera um número aleatório (ex: 5 dígitos)
+            Random random = new Random();
+            string numeroContaGerado = random.Next(10000, 99999).ToString();
+
+            // Opcional: Adicionar um dígito verificador (ex: "-X")
+            // string numeroCompleto = $"{numeroContaGerado}-{random.Next(1, 9)}";
+
+            var novaConta = new ContaBancaria
+            {
+                Saldo = 0,
+                Numero = numeroContaGerado // <--- SALVA O NÚMERO AQUI
+            };
+
+            // ... resto do código de salvar usuário ...
             _context.Contas.Add(novaConta);
             await _context.SaveChangesAsync(); // Salva para obter o Id da conta
 

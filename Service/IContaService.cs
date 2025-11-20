@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SistemaBancarioSimples.Model;
+using System.Threading.Tasks;
 
 namespace SistemaBancarioSimples.Service
 {
@@ -13,5 +14,7 @@ namespace SistemaBancarioSimples.Service
         Task DepositarAsync(int contaId, decimal valor);
         Task SacarAsync(int contaId, decimal valor);
         Task<List<Transacao>> GetHistoricoAsync(int contaId);
+
+        Task TransferirAsync(int contaOrigemId, string usernameDestino, decimal valor);
     }
 }

@@ -18,25 +18,38 @@ namespace SistemaBancarioSimples
 
         private async void Confirmar_Click(object sender, RoutedEventArgs e)
         {
-            if (!decimal.TryParse(txtValorTransferencia.Text, out decimal valor) || valor <= 0)
+            // 1. Tratamento robusto para valor (troca ponto por vírgula se necessário)
+            string valorTexto = txtValorTransferencia.Text.Replace(".", ",");
+
+            if (!decimal.TryParse(valorTexto, out decimal valor) || valor <= 0)
             {
-                MessageBox.Show("Valor inválido.");
+                MessageBox.Show("Valor inválido. Digite um valor numérico positivo.");
                 return;
             }
 
-            string contaDestino = txtContaDestino.Text;
+            // 2. Pega o NOME DO USUÁRIO (já que seu modelo usa Usuario e não Numero da Conta)
+            string usernameDestino = txtContaDestino.Text;
+
+            if (string.IsNullOrWhiteSpace(usernameDestino))
+            {
+                MessageBox.Show("Por favor, digite o nome do usuário que receberá a transferência.");
+                return;
+            }
 
             try
             {
-                // Você precisará criar esse método 'TransferirAsync' no seu Service
-                // await _contaService.TransferirAsync(_contaOrigemId, contaDestino, valor);
+                // 3. AQUI A MÁGICA ACONTECE: Chama o serviço real
+                // Note que passamos 'usernameDestino' (string) em vez de número de conta
+                await _contaService.TransferirAsync(_contaOrigemId, usernameDestino, valor);
 
-                MessageBox.Show($"Transferência de {valor:C} para conta {contaDestino} realizada!");
+                // 4. Feedback e Fechamento
+                MessageBox.Show($"Transferência de {valor:C} para {usernameDestino} realizada com sucesso!", "Sucesso");
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro: {ex.Message}");
+                // Se o usuário não existir ou não tiver saldo, o erro aparecerá aqui
+                MessageBox.Show($"Não foi possível transferir: {ex.Message}", "Erro");
             }
         }
 

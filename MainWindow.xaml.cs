@@ -27,8 +27,16 @@ namespace SistemaBancarioSimples
         {
             try
             {
+                // Busca os dados da conta (incluindo o Numero agora)
                 var conta = await _contaService.GetContaAsync(_contaId);
-                SaldoTextBlock.Text = conta.Saldo.ToString("C"); // Atualiza o texto grande
+
+                // Atualiza o Saldo
+                SaldoTextBlock.Text = conta.Saldo.ToString("C");
+
+                // NOVO: Atualiza o Número da Conta
+                // Se o número for nulo (contas antigas), mostra um padrão
+                string numero = string.IsNullOrEmpty(conta.Numero) ? "Sem Número" : conta.Numero;
+                txtNumeroConta.Text = $"Conta: {numero}";
             }
             catch (Exception ex)
             {
@@ -78,6 +86,24 @@ namespace SistemaBancarioSimples
         {
             var window = new HistoricoWindow(_contaService, _contaId);
             window.ShowDialog();
+        }
+
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Confirmação opcional (Bancos geralmente não pedem, mas é bom ter)
+            var result = MessageBox.Show("Deseja realmente sair da sua conta?", "Sair", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // 2. Cria a nova tela de login
+                // (Lembre-se: seu construtor do LoginWindow() já inicializa o BancoContext, então não precisa passar nada)
+                LoginWindow login = new LoginWindow();
+                login.Show();
+
+                // 3. Fecha a janela do banco
+                this.Close();
+            }
         }
     }
 }

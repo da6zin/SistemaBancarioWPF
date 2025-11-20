@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SistemaBancarioSimples.Model;
 
-namespace SistemaBancarioSimples.Model
+public class ContaBancaria
 {
-    public class ContaBancaria
-    {
-        // A chave primária será a chave estrangeira do Usuário (relacionamento 1:1)
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public decimal Saldo { get; set; } = 0m;
 
-        public decimal Saldo { get; set; } = 0m;
+    // NOVO: Guarda o número da conta (ex: "4829-1")
+    public string Numero { get; set; }
 
-        public ICollection<Transacao> Transacoes { get; set; }
-
-        // Propriedade de navegação
-        public Usuario Usuario { get; set; }
-    }
+    public ICollection<Transacao> Transacoes { get; set; }
+    public Usuario Usuario { get; set; }
 }
