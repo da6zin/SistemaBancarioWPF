@@ -17,6 +17,7 @@ namespace SistemaBancarioSimples.Service
         Task<List<Transacao>> GetHistoricoAsync(int contaId);
         Task TransferirAsync(int contaOrigemId, string usernameDestino, decimal valor);
         Task ExcluirContaAsync(int contaId);
+        Task<List<ContaDTO>> GetTodasContasAsync();
 
     }
 }

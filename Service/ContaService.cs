@@ -156,5 +156,15 @@ namespace SistemaBancarioSimples.Service
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<ContaDTO>> GetTodasContasAsync()
+        {
+            var contas = await _context.Contas
+                                       .Include(c => c.Usuario) // Traz o usuário junto para saber o nome
+                                       .ToListAsync();
+
+            // Converte a lista de Contas do banco para uma lista de DTOs (seguro)
+            // Usamos o Select do LINQ para converter um por um
+            return contas.Select(c => ContaMapper.ParaDTO(c)).ToList();
+        }
     }
 }

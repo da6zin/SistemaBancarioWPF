@@ -13,7 +13,7 @@
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="$" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,0,10,0"/>
-                    <TextBlock Text="Internet Banking" Foreground="White" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Text="UVV FINANCE" Foreground="White" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <Button Click="LogoutButton_Click" 

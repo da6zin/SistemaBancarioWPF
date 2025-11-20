@@ -87,5 +87,13 @@ namespace SistemaBancarioSimples
                 MensagemTextBlock.Text = $"Erro no Cadastro: {ex.Message}";
             }
         }
+
+        private void AdminButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Abre a tela de Admin passando o serviço
+            AdminWindow admin = new AdminWindow(_contaService);
+            admin.Show();
+            this.Close();
+        }
     }
 }

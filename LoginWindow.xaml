@@ -1,19 +1,52 @@
 ﻿<Window x:Class="SistemaBancarioSimples.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Login no Sistema Bancário" Height="255" Width="350">
-    <StackPanel Margin="20">
-        <TextBlock Text="Nome de Usuário:" Margin="0,0,0,5"/>
-        <TextBox x:Name="UsernameTextBox" Margin="0,0,0,10"/>
+        Title="Login" Height="500" Width="400" 
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
 
-        <TextBlock Text="Senha:" Margin="0,0,0,5"/>
-        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,20"/>
+        <Grid Background="#F5F5F5">
+            <Border Background="White" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                Width="320" CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect Color="#AAA" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Border.Effect>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
-            <Button Content="Login" Width="80" Margin="0,0,10,0" Click="LoginButton_Click"/>
-            <Button Content="Cadastrar" Width="80" Click="CadastrarButton_Click"/>
-        </StackPanel>
+                <StackPanel Margin="25">
+                    <TextBlock Text="Bem-vindo" FontSize="22" FontWeight="Bold" Foreground="#FF002A8D" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-        <TextBlock x:Name="MensagemTextBlock" Foreground="Red" TextWrapping="Wrap" HorizontalAlignment="Center"/>
-    </StackPanel>
-</Window>
+                    <TextBlock Text="Usuário:" Foreground="Gray" Margin="0,0,0,5"/>
+                    <TextBox x:Name="UsernameTextBox" Height="35" Margin="0,0,0,15" VerticalContentAlignment="Center" Padding="5"/>
+
+                    <TextBlock Text="Senha:" Foreground="Gray" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="PasswordBox" Height="35" Margin="0,0,0,20" VerticalContentAlignment="Center" Padding="5"/>
+
+                    <Button Content="ENTRAR" Click="LoginButton_Click" 
+                        Background="#FF002A8D" Foreground="White" FontWeight="Bold" Height="40" BorderThickness="0" Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="5"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+
+                    <Button Content="Cadastrar-se" Click="CadastrarButton_Click" 
+                        Background="Transparent" Foreground="#555" Margin="0,10,0,0" BorderThickness="0" Cursor="Hand" Style="{x:Null}"/>
+
+                    <Button Click="AdminButton_Click" 
+                        Background="Transparent" 
+                        Foreground="#333" 
+                        BorderThickness="0" 
+                        Margin="0,15,0,0" 
+                        Cursor="Hand" 
+                        Style="{x:Null}"
+                        HorizontalAlignment="Center">
+
+                        <TextBlock Text="Sou Funcionário / Admin" TextDecorations="Underline" FontSize="12"/>
+                    </Button>
+
+                    <TextBlock x:Name="MensagemTextBlock" Foreground="Red" TextWrapping="Wrap" 
+                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,15,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Window>
