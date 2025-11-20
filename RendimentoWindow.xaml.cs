@@ -24,6 +24,7 @@ namespace SistemaBancarioSimples
             _ = CarregarSaldoAsync();
         }
 
+        //teste
         private async System.Threading.Tasks.Task CarregarSaldoAsync()
         {
             try
